@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import { connectDatabase } from "./config/database";
+import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 
 const app = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
@@ -16,6 +18,12 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
+
+// Auth routes
+app.use("/api/auth", authRoutes);
+
+// User routes (protected)
+app.use("/api/users", userRoutes);
 
 // Start server
 const startServer = async () => {
