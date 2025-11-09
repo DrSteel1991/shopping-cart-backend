@@ -6,7 +6,7 @@ const productSchema = new Schema(
     description: String,
     images: [String],
     price: { type: Number, required: true },
-    category: { type: Schema.Types.ObjectId, ref: "Category" },
+    category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     brand: String,
     stock: { type: Number, default: 0 },
     ratingsAverage: { type: Number, default: 0 },
