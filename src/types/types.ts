@@ -59,3 +59,30 @@ export interface RegisterResponse {
   };
   error?: string;
 }
+
+// Category types
+export interface Category extends Document {
+  name: string;
+  slug: string;
+  description?: string;
+  parent?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateCategoryRequestBody {
+  name: string;
+  slug: string;
+  description?: string;
+  parentId?: string; // For subcategories
+}
+
+export interface CategoryResponse {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parent?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
