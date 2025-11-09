@@ -10,7 +10,7 @@ export interface User extends Document {
   phone: string;
   address?: Address[];
   cart?: {
-    productId: any;
+    productId: string;
     quantity: number;
   }[];
   createdAt: Date;
@@ -83,6 +83,87 @@ export interface CategoryResponse {
   slug: string;
   description?: string;
   parent?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Input variant type - size and color are strings
+export interface ProductVariantInput {
+  size?: string;
+  color?: string;
+  name?: string;
+  stock: number;
+  price?: number;
+  available?: boolean;
+  sku?: string;
+}
+
+// Output variant type - size and color are strings
+export interface ProductVariant {
+  _id?: string; // Variant ID (Mongoose subdocument ID)
+  size?: string; // Size (e.g., "256GB" or "Small")
+  color?: string; // Color (e.g., "black" or "red")
+  name?: string; // Optional variant name/label for display
+  stock: number;
+  price?: number; // Optional price override
+  available: boolean;
+  sku?: string; // Optional SKU for this variant
+}
+
+export interface Product extends Document {
+  name: string;
+  description?: string;
+  images?: string[];
+  price: number;
+  category: string;
+  brand?: string;
+  variants: ProductVariant[]; // Variants with arrays of sizes and colors
+  ratingsAverage?: number;
+  ratingsCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
+  isVariantAvailable(
+    options: {
+      size?: string;
+      color?: string;
+      sku?: string;
+      variantId?: string;
+    },
+    quantity?: number
+  ): boolean;
+  getVariant(options: {
+    size?: string;
+    color?: string;
+    sku?: string;
+    variantId?: string;
+  }): ProductVariant | undefined;
+}
+
+export interface CreateProductRequestBody {
+  name: string;
+  slug: string;
+  description?: string;
+  images?: string[];
+  price: number;
+  categoryId: string;
+  brand?: string;
+  ratingsAverage?: number;
+  ratingsCount?: number;
+  variants?: ProductVariantInput[]; // Variants with size and color as strings
+}
+
+export interface ProductResponse {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  images?: string[];
+  price: number;
+  category?: string | null;
+  brand?: string;
+  variants: ProductVariant[];
+  ratingsAverage?: number;
+  ratingsCount?: number;
   createdAt: Date;
   updatedAt: Date;
 }

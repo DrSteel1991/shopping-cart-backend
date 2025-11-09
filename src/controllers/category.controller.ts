@@ -71,7 +71,10 @@ export const createCategory = async (
       description: category.description || undefined,
       parent: category.parent
         ? typeof category.parent === "object" && category.parent !== null
-          ? String((category.parent as any)._id || category.parent)
+          ? String(
+              (category.parent as { _id?: mongoose.Types.ObjectId })._id ||
+                category.parent
+            )
           : String(category.parent)
         : null,
       createdAt: category.createdAt,
@@ -95,23 +98,8 @@ export const getCategories = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { includeSubcategories, parentId } = req.query;
-
-    let query: any = {};
-
-    // If parentId is provided, get only subcategories of that parent
-    if (parentId) {
-      if (!mongoose.Types.ObjectId.isValid(parentId as string)) {
-        res.status(400).json({ error: "Invalid parent category ID" });
-        return;
-      }
-      query.parent = parentId;
-    } else if (includeSubcategories !== "true") {
-      // If not including subcategories, get only top-level categories
-      query.parent = null;
-    }
-
-    const categories = await Category.find(query)
+    // Return all categories without filtering
+    const categories = await Category.find({})
       .populate("parent", "name slug")
       .sort({ name: 1 });
 
@@ -122,7 +110,10 @@ export const getCategories = async (
       description: cat.description || undefined,
       parent: cat.parent
         ? typeof cat.parent === "object" && cat.parent !== null
-          ? String((cat.parent as any)._id || cat.parent)
+          ? String(
+              (cat.parent as { _id?: mongoose.Types.ObjectId })._id ||
+                cat.parent
+            )
           : String(cat.parent)
         : null,
       createdAt: cat.createdAt,
@@ -168,7 +159,10 @@ export const getCategoryById = async (
       description: category.description || undefined,
       parent: category.parent
         ? typeof category.parent === "object" && category.parent !== null
-          ? String((category.parent as any)._id || category.parent)
+          ? String(
+              (category.parent as { _id?: mongoose.Types.ObjectId })._id ||
+                category.parent
+            )
           : String(category.parent)
         : null,
       createdAt: category.createdAt,

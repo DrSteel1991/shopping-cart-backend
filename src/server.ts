@@ -3,6 +3,7 @@ import { connectDatabase } from "./config/database";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import categoryRoutes from "./routes/category.routes";
+import productRoutes from "./routes/product.routes";
 
 const app = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
@@ -28,6 +29,9 @@ app.use("/api/users", userRoutes);
 
 // Category routes
 app.use("/api/categories", categoryRoutes);
+
+// Product routes
+app.use("/api/products", productRoutes);
 
 // Start server
 const startServer = async () => {

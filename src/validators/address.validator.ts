@@ -5,18 +5,22 @@ import { Address } from "../types/types";
  * @param address - The address object to validate
  * @returns true if address is valid, false otherwise
  */
-export const isValidAddress = (address: any): address is Address => {
+export const isValidAddress = (address: unknown): address is Address => {
   return (
-    address &&
+    address !== null &&
     typeof address === "object" &&
-    typeof address.street === "string" &&
-    address.street.trim() !== "" &&
-    typeof address.city === "string" &&
-    address.city.trim() !== "" &&
-    typeof address.country === "string" &&
-    address.country.trim() !== "" &&
-    typeof address.postalCode === "string" &&
-    address.postalCode.trim() !== ""
+    "street" in address &&
+    "city" in address &&
+    "country" in address &&
+    "postalCode" in address &&
+    typeof (address as { street: unknown }).street === "string" &&
+    ((address as { street: string }).street.trim() !== "") &&
+    typeof (address as { city: unknown }).city === "string" &&
+    ((address as { city: string }).city.trim() !== "") &&
+    typeof (address as { country: unknown }).country === "string" &&
+    ((address as { country: string }).country.trim() !== "") &&
+    typeof (address as { postalCode: unknown }).postalCode === "string" &&
+    ((address as { postalCode: string }).postalCode.trim() !== "")
   );
 };
 
