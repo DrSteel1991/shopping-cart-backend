@@ -2,12 +2,26 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/users.model";
+import {
+  LoginRequestBody,
+  RegisterRequestBody,
+  RegisterResponse,
+} from "../types/types";
+import { validateAddressArray } from "../validators/address.validator";
+
+// Typed Request interface
+interface TypedRequest<T> extends Request {
+  body: T;
+}
 
 const JWT_SECRET: string =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
 const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || "7d";
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (
+  req: TypedRequest<LoginRequestBody>,
+  res: Response
+): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -52,12 +66,23 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const register = async (req: Request, res: Response): Promise<void> => {
+export const register = async (
+  req: TypedRequest<RegisterRequestBody>,
+  res: Response<RegisterResponse>
+): Promise<void> => {
   try {
-    const { firstName, lastName, email, password, role, phone } = req.body;
+    const { firstName, lastName, email, password, role, phone, address } =
+      req.body;
 
-    if (!firstName || !lastName || !email || !password || !phone) {
+    if (!firstName || !lastName || !email || !password || !phone || !address) {
       res.status(400).json({ error: "All fields are required" });
+      return;
+    }
+
+    // Validate address array
+    const addressValidation = validateAddressArray(address);
+    if (!addressValidation.isValid) {
+      res.status(400).json({ error: addressValidation.error });
       return;
     }
 
@@ -75,8 +100,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       lastName,
       email,
       password: hashedPassword,
-      role: role || "user", // Default role is 'user'
+      role: role || "user",
       phone,
+      address: addressValidation.addressArray,
     });
 
     await user.save();
@@ -91,12 +117,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       message: "User registered successfully",
       token,
       user: {
-        id: user._id,
+        id: user._id?.toString() || "",
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         role: user.role,
         phone: user.phone,
+        address: user.address || [],
+        cart: user.cart || [],
       },
     });
   } catch (error) {
