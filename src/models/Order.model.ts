@@ -10,17 +10,39 @@ const orderSchema = new Schema(
           ref: "Product",
           required: true,
         },
+        variant: {
+          size: {
+            type: String,
+            enum: ["256GB", "512GB", "1TB"],
+          },
+          color: {
+            type: String,
+            enum: ["black", "gold", "silver", "blue"],
+          },
+          name: {
+            type: String,
+            required: true,
+          },
+          price: {
+            type: Number,
+            required: true,
+          },
+          available: {
+            type: Boolean,
+            required: true,
+          },
+          stock: {
+            type: Number,
+            required: true,
+          },
+          sku: {
+            type: String,
+            required: true,
+          },
+          required: false,
+        },
         quantity: { type: Number, required: true, min: 1 },
         price: { type: Number, required: true, min: 0 },
-        // Variant information for size and color
-        size: {
-          type: String,
-          enum: ["256GB", "512GB", "1TB"],
-        },
-        color: {
-          type: String,
-          enum: ["black", "gold", "silver", "blue"],
-        },
       },
     ],
     shippingAddress: {

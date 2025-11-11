@@ -71,7 +71,7 @@ export const createProduct = async (
       description: description?.trim(),
       images: images || [],
       price,
-      category: categoryId,
+      category: new mongoose.Types.ObjectId(categoryId),
       brand: brand?.trim(),
       variants: normalizeVariants(variants),
       ratingsAverage: ratingsAverage || 0,
@@ -123,11 +123,13 @@ export const getProducts = async (
     const query: FilterQuery<typeof Product> = {};
 
     if (categoryId) {
-      if (!mongoose.Types.ObjectId.isValid(categoryId as string)) {
+      const categoryIdStr = String(categoryId).trim();
+      if (!mongoose.Types.ObjectId.isValid(categoryIdStr)) {
         res.status(400).json({ error: "Invalid category ID" });
         return;
       }
-      query.category = categoryId;
+      // Convert to ObjectId for proper MongoDB query matching
+      query.category = new mongoose.Types.ObjectId(categoryIdStr);
     }
 
     if (brand) {
