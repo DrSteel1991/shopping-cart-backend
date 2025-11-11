@@ -3,7 +3,6 @@ import { authenticate, AuthRequest } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// Protected route example - requires authentication
 router.get("/profile", authenticate, (req: AuthRequest, res: Response) => {
   res.json({
     message: "This is a protected route",
@@ -16,4 +15,3 @@ router.get("/profile", authenticate, (req: AuthRequest, res: Response) => {
 });
 
 export default router;
-

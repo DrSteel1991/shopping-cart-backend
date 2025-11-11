@@ -8,38 +8,21 @@ import productRoutes from "./routes/product.routes";
 const app = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Welcome to Shopping Cart Backend API" });
-});
-
-app.get("/health", (req: Request, res: Response) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
-});
-
-// Auth routes
 app.use("/api/auth", authRoutes);
 
-// User routes (protected)
 app.use("/api/users", userRoutes);
 
-// Category routes
 app.use("/api/categories", categoryRoutes);
 
-// Product routes
 app.use("/api/products", productRoutes);
 
-// Start server
 const startServer = async () => {
   try {
-    // Connect to database
     await connectDatabase();
 
-    // Start Express server
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });

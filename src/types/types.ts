@@ -87,7 +87,6 @@ export interface CategoryResponse {
   updatedAt: Date;
 }
 
-// Input variant type - size and color are strings
 export interface ProductVariantInput {
   size?: string;
   color?: string;
@@ -98,26 +97,26 @@ export interface ProductVariantInput {
   sku?: string;
 }
 
-// Output variant type - size and color are strings
 export interface ProductVariant {
-  _id?: string; // Variant ID (Mongoose subdocument ID)
-  size?: string; // Size (e.g., "256GB" or "Small")
-  color?: string; // Color (e.g., "black" or "red")
-  name?: string; // Optional variant name/label for display
+  _id?: string;
+  size?: string;
+  color?: string;
+  name?: string;
   stock: number;
-  price?: number; // Optional price override
+  price?: number;
   available: boolean;
-  sku?: string; // Optional SKU for this variant
+  sku?: string;
 }
 
 export interface Product extends Document {
+  slug: string;
   name: string;
   description?: string;
   images?: string[];
   price: number;
   category: string;
   brand?: string;
-  variants: ProductVariant[]; // Variants with arrays of sizes and colors
+  variants: ProductVariant[];
   ratingsAverage?: number;
   ratingsCount?: number;
   createdAt: Date;
@@ -149,7 +148,7 @@ export interface CreateProductRequestBody {
   brand?: string;
   ratingsAverage?: number;
   ratingsCount?: number;
-  variants?: ProductVariantInput[]; // Variants with size and color as strings
+  variants?: ProductVariantInput[];
 }
 
 export interface ProductResponse {

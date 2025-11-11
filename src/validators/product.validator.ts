@@ -1,29 +1,16 @@
 import { ProductVariantInput } from "../types/types";
 import { normalizeString } from "../utils/product.utils";
 
-/**
- * Validates product variants (flexible - supports any size/color combinations)
- * Provides business logic validation that Mongoose schema doesn't handle:
- * - Duplicate SKU detection
- * - Duplicate size+color combination detection
- * - Better error messages
- *
- * @param variants - Array of variant objects to validate
- * @returns Object with isValid flag and error message if invalid
- */
 export const validateVariants = (
   variants: ProductVariantInput[] | undefined
 ): {
   isValid: boolean;
   error?: string;
 } => {
-  // Variants are optional - products can have no variants (simple products)
   if (!variants || variants.length === 0) {
-    return { isValid: true }; // Empty variants array is valid
+    return { isValid: true };
   }
 
-  // Check for duplicate variants
-  // Duplicates are determined by: SKU (if provided), or size+color combination
   const seenBySku = new Set<string>();
   const seenByCombo = new Set<string>();
 
@@ -34,7 +21,6 @@ export const validateVariants = (
     const size = normalizeString(variant.size);
     const color = normalizeString(variant.color);
 
-    // At least one of size, color, or SKU should be provided
     if (!size && !color && !variant.sku) {
       return {
         isValid: false,
@@ -44,7 +30,6 @@ export const validateVariants = (
       };
     }
 
-    // Check for duplicate SKU
     if (variant.sku) {
       if (seenBySku.has(variant.sku)) {
         return {
@@ -55,7 +40,6 @@ export const validateVariants = (
       seenBySku.add(variant.sku);
     }
 
-    // Check for duplicate size+color combination (if both are provided)
     if (size && color) {
       const comboKey = `${size}|${color}`;
       if (seenByCombo.has(comboKey)) {
@@ -67,7 +51,6 @@ export const validateVariants = (
       seenByCombo.add(comboKey);
     }
 
-    // Validate stock
     if (typeof variant.stock !== "number" || variant.stock < 0) {
       const variantLabel =
         variant.name ||
@@ -84,7 +67,6 @@ export const validateVariants = (
       };
     }
 
-    // Validate price if provided
     if (
       variant.price !== undefined &&
       (typeof variant.price !== "number" || variant.price < 0)
@@ -104,7 +86,6 @@ export const validateVariants = (
       };
     }
 
-    // Validate available flag
     if (
       variant.available !== undefined &&
       typeof variant.available !== "boolean"

@@ -1,9 +1,11 @@
 import { Response, Request } from "express";
-import { Category } from "../models/Category.model";
-import { CreateCategoryRequestBody, CategoryResponse } from "../types/types";
-import mongoose from "mongoose";
+import { CreateCategoryRequestBody } from "../types/types";
+import {
+  createCategory as createCategoryService,
+  getCategories as getCategoriesService,
+  getCategoryById as getCategoryByIdService,
+} from "../services/category.service";
 
-// Typed Request interface
 interface TypedRequest<T> extends Request {
   body: T;
 }
@@ -15,7 +17,6 @@ export const createCategory = async (
   try {
     const { name, slug, description, parentId } = req.body;
 
-    // Validate required fields
     if (!name || name.trim() === "") {
       res.status(400).json({ error: "Category name is required" });
       return;
@@ -26,70 +27,33 @@ export const createCategory = async (
       return;
     }
 
-    // Normalize slug (trim and lowercase)
-    const normalizedSlug = slug.trim().toLowerCase();
-
-    // Check if category with same slug already exists
-    const existingCategory = await Category.findOne({ slug: normalizedSlug });
-    if (existingCategory) {
-      res.status(409).json({ error: "Category with this slug already exists" });
-      return;
-    }
-
-    // If parentId is provided, validate it exists
-    let parent = null;
-    if (parentId) {
-      if (!mongoose.Types.ObjectId.isValid(parentId)) {
-        res.status(400).json({ error: "Invalid parent category ID" });
-        return;
-      }
-
-      parent = await Category.findById(parentId);
-      if (!parent) {
-        res.status(404).json({ error: "Parent category not found" });
-        return;
-      }
-    }
-
-    // Create category
-    const category = new Category({
-      name: name.trim(),
-      slug: normalizedSlug,
-      description: description?.trim(),
-      parent: parentId || null,
+    const category = await createCategoryService({
+      name,
+      slug,
+      description,
+      parentId,
     });
-
-    await category.save();
-
-    // Populate parent if it exists
-    await category.populate("parent", "name slug");
-
-    const response: CategoryResponse = {
-      id: category._id.toString(),
-      name: category.name,
-      slug: category.slug || "",
-      description: category.description || undefined,
-      parent: category.parent
-        ? typeof category.parent === "object" && category.parent !== null
-          ? String(
-              (category.parent as { _id?: mongoose.Types.ObjectId })._id ||
-                category.parent
-            )
-          : String(category.parent)
-        : null,
-      createdAt: category.createdAt,
-      updatedAt: category.updatedAt,
-    };
 
     res.status(201).json({
       message: parentId
         ? "Subcategory created successfully"
         : "Category created successfully",
-      category: response,
+      category,
     });
   } catch (error) {
-    console.error("Create category error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    const statusCode =
+      errorMessage.includes("already exists") ||
+      errorMessage.includes("not found") ||
+      errorMessage.includes("Invalid")
+        ? errorMessage.includes("already exists")
+          ? 409
+          : errorMessage.includes("not found")
+          ? 404
+          : 400
+        : 500;
+    res.status(statusCode).json({ error: errorMessage });
   }
 };
 
@@ -98,35 +62,16 @@ export const getCategories = async (
   res: Response
 ): Promise<void> => {
   try {
-    // Return all categories without filtering
-    const categories = await Category.find({})
-      .populate("parent", "name slug")
-      .sort({ name: 1 });
-
-    const categoriesResponse: CategoryResponse[] = categories.map((cat) => ({
-      id: cat._id.toString(),
-      name: cat.name,
-      slug: cat.slug || "",
-      description: cat.description || undefined,
-      parent: cat.parent
-        ? typeof cat.parent === "object" && cat.parent !== null
-          ? String(
-              (cat.parent as { _id?: mongoose.Types.ObjectId })._id ||
-                cat.parent
-            )
-          : String(cat.parent)
-        : null,
-      createdAt: cat.createdAt,
-      updatedAt: cat.updatedAt,
-    }));
+    const categories = await getCategoriesService();
 
     res.json({
-      count: categoriesResponse.length,
-      categories: categoriesResponse,
+      count: categories.length,
+      categories,
     });
   } catch (error) {
-    console.error("Get categories error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ error: errorMessage });
   }
 };
 
@@ -137,41 +82,18 @@ export const getCategoryById = async (
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      res.status(400).json({ error: "Invalid category ID" });
-      return;
-    }
+    const category = await getCategoryByIdService(id);
 
-    const category = await Category.findById(id).populate(
-      "parent",
-      "name slug"
-    );
-
-    if (!category) {
-      res.status(404).json({ error: "Category not found" });
-      return;
-    }
-
-    const response: CategoryResponse = {
-      id: category._id.toString(),
-      name: category.name,
-      slug: category.slug || "",
-      description: category.description || undefined,
-      parent: category.parent
-        ? typeof category.parent === "object" && category.parent !== null
-          ? String(
-              (category.parent as { _id?: mongoose.Types.ObjectId })._id ||
-                category.parent
-            )
-          : String(category.parent)
-        : null,
-      createdAt: category.createdAt,
-      updatedAt: category.updatedAt,
-    };
-
-    res.json({ category: response });
+    res.json({ category });
   } catch (error) {
-    console.error("Get category error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    const statusCode =
+      errorMessage.includes("Invalid") || errorMessage.includes("not found")
+        ? errorMessage.includes("not found")
+          ? 404
+          : 400
+        : 500;
+    res.status(statusCode).json({ error: errorMessage });
   }
 };

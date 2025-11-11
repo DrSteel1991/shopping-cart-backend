@@ -12,6 +12,10 @@ import { ProductVariant } from "../types/types";
  */
 const productSchema = new Schema(
   {
+    _id: {
+      type: String,
+      unique: true,
+    },
     name: {
       type: String,
       required: true,
