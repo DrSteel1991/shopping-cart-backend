@@ -3,21 +3,17 @@ import mongoose from "mongoose";
 // Database name from environment variable or default
 const DB_NAME = process.env.DB_NAME || "shoppingCartDB";
 
-// Base cluster connection string (without database name)
-const CLUSTER_URI =
-  "mongodb+srv://anthonyalhelou_db_user:iQHtZPebKNeMaTbc@shoppingcartcluster.xkzxlup.mongodb.net";
-
 // Construct full connection string with database name
 // Format: mongodb+srv://...@cluster.mongodb.net/databaseName?options
 const getConnectionString = (): string => {
-  // If MONGO_URI is provided in env, use it directly (should include DB name)
-  if (process.env.MONGO_URI) {
-    return process.env.MONGO_URI;
+  // MONGO_URI must be provided in environment variables
+  if (!process.env.MONGO_URI) {
+    throw new Error(
+      "MONGO_URI is required in environment variables. Please set it in your .env file."
+    );
   }
 
-  // Otherwise, construct it with the database name
-  // Insert database name before the query parameters
-  return `${CLUSTER_URI}/${DB_NAME}?appName=shoppingCartCluster`;
+  return process.env.MONGO_URI;
 };
 
 export const connectDatabase = async (): Promise<void> => {

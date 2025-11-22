@@ -9,6 +9,9 @@
     "dev": "nodemon",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
+    "seed:products": "ts-node scripts/seed-products.ts",
+    "delete:products": "ts-node scripts/delete-products.ts",
+    "delete:categories": "ts-node scripts/delete-categories.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,11 +20,13 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",

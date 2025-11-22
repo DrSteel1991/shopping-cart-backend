@@ -94,8 +94,6 @@ const productSchema = new Schema(
         sku: {
           type: String,
           trim: true,
-          unique: true,
-          sparse: true, // Allows multiple null values
         },
       },
     ],
@@ -121,7 +119,7 @@ const productSchema = new Schema(
 );
 
 productSchema.index({ category: 1, slug: 1 });
-productSchema.index({ "variants.sku": 1 });
+productSchema.index({ "variants.sku": 1 }, { unique: true, sparse: true });
 
 // Method to check if a variant is available for a specific size and color
 // Supports matching by size, color, both, SKU, or variantId
